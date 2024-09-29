@@ -1,0 +1,34 @@
+<policies>
+  <inbound>
+    <base />
+    <set-header name="X-Request-Timestamp" exists-action="override">
+      <value>@(DateTime.UtcNow.ToString("o"))</value>
+    </set-header>
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+      <set-variable name="resBody" value="@(context.Response.Body.As<string>(preserveContent: true))" />
+      <send-one-way-request mode="new">
+      <set-url>{{functionUrl}}</set-url>
+      <set-method>POST</set-method>
+      <set-body>@{
+        var resBodyObj = JsonConvert.DeserializeObject<JObject>((String)context.Variables["resBody"]);
+        return new JObject(
+          new JProperty("ApiName", context.Api.Name),
+          new JProperty("Subscription", context.Subscription?.Name),
+          new JProperty("PromptTokens", resBodyObj["usage"]["prompt_tokens"]),
+          new JProperty("CompletionTokens", resBodyObj["usage"]["completion_tokens"]),
+          new JProperty("TotalTokens", resBodyObj["usage"]["total_tokens"]),
+          new JProperty("PromptTimestamp", context.Request.Headers.GetValueOrDefault(headerName: "X-Request-Timestamp", defaultValue: DateTime.UtcNow.ToString("o"))),
+          new JProperty("CompletionTimestamp", resBodyObj["created"])
+        ).ToString();
+      }</set-body>
+    </send-one-way-request>
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>

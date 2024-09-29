@@ -1,0 +1,10 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AzureWebJobsStorage": "",
+    "COSMOS_CONNECTION_STRING": "mongodb://root:password@mongo:27017?tls=false",
+    "MONGO_DB_NAME": "api",
+    "MONGO_COLLECTION_NAME": "prompt_log"
+  }
+}

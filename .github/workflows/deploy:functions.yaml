@@ -1,0 +1,52 @@
+# Azure Functionsへのデプロイを行うWorkflow
+name: deploy:functions
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - functions/**
+      - .github/workflows/deploy:functions.yaml
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: functions
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v2
+        with:
+          enable-cache: true
+          cache-dependency-glob: "functions/uv.lock"
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+      - name: Generate requirements.txt
+        run: uv pip freeze > requirements.txt
+      - name: Install packages
+        run: pip install -r requirements.txt -t '.python_packages/lib/site-packages'
+      - name: Bundle artifact
+        run: zip -r build.zip function_app.py host.json requirements.txt .python_packages
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: functions
+    steps:
+      - name: Log in with Azure
+        uses: azure/login@v1
+        with:
+          creds: '${{ secrets.AZURE_CREDENTIALS }}'
+      - name: Deploy to Azure Functions
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.0.72
+          inlineScript: |
+            az functionapp deployment source config-zip \
+              -g '${{ secrets.AZURE_RESOURCE_GROUP }}' \
+              -n '${{ secrets.AZURE_FUNCTION_NAME }}' \
+              --src build.zip

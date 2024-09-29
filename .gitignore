@@ -1,0 +1,23 @@
+# Secret Files
+.env
+.secrets
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.python_packages
+requirements.txt
+
+# Artifact
+build.zip
+
+# Virtual environments
+.venv
+
+# Bicep Parameters
+*.bicepparam
+!sample.bicepparam

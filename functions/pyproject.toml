@@ -1,0 +1,11 @@
+[project]
+name = "mongo-prompt-log"
+version = "0.1.0"
+description = "MongoDBにプロンプトログを格納するFunction"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "azure-functions>=1.21.0",
+    "pydantic>=2.9.2",
+    "pymongo>=4.9.1",
+]
